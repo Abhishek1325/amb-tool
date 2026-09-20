@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microsoft Ambassador Link Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        input[type="url"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .ambassador-selection {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .ambassador-option {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .ambassador-option input[type="radio"] {
+            display: none;
+        }
+
+        .ambassador-option label {
+            display: block;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .ambassador-option input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .ambassador-option label:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-link {
+            word-break: break-all;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 1px solid #e0e0e0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .copy-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .copy-btn.copied {
+            background: #17a2b8;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .ambassador-selection {
+                flex-direction: column;
+            }
+            
+            .ambassador-option {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Microsoft Ambassador Link Tool</h1>
+        
+        <form id="linkForm">
+            <div class="form-group">
+                <label for="originalLink">Enter Original Link:</label>
+                <input type="url" id="originalLink" placeholder="https://example.com" required>
+                <div class="error" id="linkError">Please enter a valid URL</div>
+            </div>
+
+            <div class="form-group">
+                <label>Select Ambassador:</label>
+                <div class="ambassador-selection">
+                    <div class="ambassador-option">
+                        <input type="radio" id="kamakshi" name="ambassador" value="kamakshi" required>
+                        <label for="kamakshi">
+                            👨‍💻 Kamakshi<br>
+                            <small>ID: 628949</small>
+                        </label>
+                    </div>
+                    <div class="ambassador-option">
+                        <input type="radio" id="abhishek" name="ambassador" value="abhishek" required>
+                        <label for="abhishek">
+                            👨‍💻 Abhishek<br>
+                            <small>ID: 458088</small>
+                        </label>
+                    </div>
+                    <div class="ambassador-option">
+                        <input type="radio" id="shahee" name="ambassador" value="shahee" required>
+                        <label for="shahee">
+                            👨‍💻 Shahee<br>
+                            <small>ID: 621016</small>
+                        </label>
+                    </div>
+                    <div class="ambassador-option">
+                        <input type="radio" id="shaurya" name="ambassador" value="shaurya" required>
+                        <label for="shaurya">
+                            👨‍💻 Shaurya<br>
+                            <small>ID: 621234</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="generate-btn">✨ Generate Ambassador Link</button>
+        </form>
+
+        <div id="result" class="result">
+            <h3>🎉 Your Ambassador Link is Ready!</h3>
+            <div class="result-link" id="generatedLink"></div>
+            <button class="copy-btn" id="copyBtn">📋 Copy Link</button>
+        </div>
+    </div>
+
+    <script>
+        const ambassadorParams = {
+            kamakshi: '?wt.mc_id=studentamb_628949',
+            abhishek: '?wt.mc_id=studentamb_458088',
+            shahee: '?wt.mc_id=studentamb_621016',
+            shaurya: '?wt.mc_id=studentamb_621234'
+        };
+
+        document.getElementById('linkForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const originalLink = document.getElementById('originalLink').value.trim();
+            const selectedAmbassador = document.querySelector('input[name="ambassador"]:checked');
+            const linkError = document.getElementById('linkError');
+            const result = document.getElementById('result');
+            const generatedLink = document.getElementById('generatedLink');
+            
+            // Reset error state
+            linkError.style.display = 'none';
+            
+            // Validate URL
+            try {
+                new URL(originalLink);
+            } catch {
+                linkError.style.display = 'block';
+                return;
+            }
+            
+            if (!selectedAmbassador) {
+                alert('Please select an ambassador!');
+                return;
+            }
+            
+            // Generate the new link
+            const ambassadorParam = ambassadorParams[selectedAmbassador.value];
+            const url = new URL(originalLink);
+            
+            // Check if URL already has query parameters
+            let newLink;
+            if (url.search) {
+                // Already has query parameters, add with &
+                newLink = originalLink + '&wt.mc_id=' + ambassadorParam.split('=')[1];
+            } else {
+                // No query parameters, add with ?
+                newLink = originalLink + ambassadorParam;
+            }
+            
+            // Display result
+            generatedLink.textContent = newLink;
+            result.classList.add('show');
+            
+            // Scroll to result
+            result.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const linkText = document.getElementById('generatedLink').textContent;
+            const copyBtn = document.getElementById('copyBtn');
+            
+            navigator.clipboard.writeText(linkText).then(function() {
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✅ Copied!';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(function() {
+                    copyBtn.textContent = originalText;
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            }).catch(function() {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = linkText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✅ Copied!';
+                copyBtn.classList.add('copied');
+                
+                setTimeout(function() {
+                    copyBtn.textContent = originalText;
+                    copyBtn.classList.remove('copied');
+                }, 2000);
+            });
+        });
+
+        // Add some interactive effects
+        document.querySelectorAll('input[type="url"]').forEach(input => {
+            input.addEventListener('input', function() {
+                document.getElementById('result').classList.remove('show');
+            });
+        });
+
+        document.querySelectorAll('input[name="ambassador"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('result').classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>
